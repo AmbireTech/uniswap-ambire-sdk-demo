@@ -17,6 +17,7 @@ export enum ConnectionType {
   WALLET_CONNECT = 'WALLET_CONNECT',
   NETWORK = 'NETWORK',
   GNOSIS_SAFE = 'GNOSIS_SAFE',
+  AMBIRE = 'AMBIRE',
 }
 
 export interface Connection {
@@ -75,6 +76,31 @@ export const walletConnectConnection: Connection = {
   connector: web3WalletConnect,
   hooks: web3WalletConnectHooks,
   type: ConnectionType.WALLET_CONNECT,
+}
+
+const [ambireConnect, ambireConnectHooks] = initializeConnector<WalletConnect>((actions) => {
+  // Avoid testing for the best URL by only passing a single URL per chain.
+  // Otherwise, WC will not initialize until all URLs have been tested (see getBestUrl in web3-react).
+  const RPC_URLS_WITHOUT_FALLBACKS = Object.entries(RPC_URLS).reduce(
+    (map, [chainId, urls]) => ({
+      ...map,
+      [chainId]: urls[0],
+    }),
+    {}
+  )
+  return new WalletConnect({
+    actions,
+    options: {
+      rpc: RPC_URLS_WITHOUT_FALLBACKS,
+      qrcode: true,
+    },
+    onError,
+  })
+})
+export const ambireConnection: Connection = {
+  connector: ambireConnect,
+  hooks: ambireConnectHooks,
+  type: ConnectionType.AMBIRE,
 }
 
 const [web3CoinbaseWallet, web3CoinbaseWalletHooks] = initializeConnector<CoinbaseWallet>(

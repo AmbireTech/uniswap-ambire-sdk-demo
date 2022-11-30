@@ -1,5 +1,6 @@
 import { Connector } from '@web3-react/types'
 import {
+  ambireConnection,
   coinbaseWalletConnection,
   ConnectionType,
   gnosisSafeConnection,
@@ -21,6 +22,7 @@ export function getIsCoinbaseWallet(): boolean {
 }
 
 const CONNECTIONS = [
+  ambireConnection,
   gnosisSafeConnection,
   injectedConnection,
   coinbaseWalletConnection,
@@ -46,6 +48,8 @@ export function getConnection(c: Connector | ConnectionType) {
         return networkConnection
       case ConnectionType.GNOSIS_SAFE:
         return gnosisSafeConnection
+      case ConnectionType.AMBIRE:
+        return ambireConnection
     }
   }
 }
@@ -62,5 +66,7 @@ export function getConnectionName(connectionType: ConnectionType, isMetaMask?: b
       return 'Network'
     case ConnectionType.GNOSIS_SAFE:
       return 'Gnosis Safe'
+    case ConnectionType.AMBIRE:
+      return 'Ambire'
   }
 }

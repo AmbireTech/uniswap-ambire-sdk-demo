@@ -27,6 +27,7 @@ import { ExternalLink, ThemedText } from '../../theme'
 import AccountDetails from '../AccountDetails'
 import { LightCard } from '../Card'
 import Modal from '../Modal'
+import { AmbireLogin } from './AmbireLogin'
 import { CoinbaseWalletOption, OpenCoinbaseWalletOption } from './CoinbaseWalletOption'
 import { InjectedOption, InstallMetaMaskOption, MetaMaskOption } from './InjectedOption'
 import PendingView from './PendingView'
@@ -273,11 +274,14 @@ export default function WalletModal({
     const walletConnectionOption =
       (!isInjectedMobileBrowser && <WalletConnectOption tryActivation={tryActivation} />) ?? null
 
+    const ambireLogin = <AmbireLogin />
+
     return (
       <>
         {injectedOption}
         {coinbaseWalletOption}
         {walletConnectionOption}
+        {ambireLogin}
       </>
     )
   }
