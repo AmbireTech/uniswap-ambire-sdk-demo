@@ -79,28 +79,28 @@ export const walletConnectConnection: Connection = {
   type: ConnectionType.WALLET_CONNECT,
 }
 
+const ambireSDK = new window.AmbireSDK({
+  walletUrl: 'http://localhost:3000',
+  dappName: 'dapp1',
+  chainID: 1,
+  iframeElementId: 'ambire-sdk-iframe',
+})
 class AmbireWallet extends Connector {
-  activate(): Promise<void> | void {
-    if (window.AmbireSDK) {
-      const ambireSDK = new window.AmbireSDK({
-        walletUrl: 'http://localhost:3000',
-        dappName: 'dapp1',
-        chainID: 1,
-        iframeElementId: 'ambire-sdk-iframe',
-      })
-      ambireSDK.openLogin()
+  activate(chainId: any): Promise<void> | void {
+    const activeChainId = chainId ? chainId.chainId : 1
+    ambireSDK.openLogin()
 
-      return new Promise((resolve, reject) => {
-        ambireSDK.onLoginSuccess((address: string) => {
-          this.actions.update({ chainId: 1, accounts: [address] })
-          resolve()
-        })
-        ambireSDK.onRegistrationSuccess((address: string) => {
-          this.actions.update({ chainId: 1, accounts: [address] })
-          resolve()
-        })
+    return new Promise((resolve, reject) => {
+      ambireSDK.onLoginSuccess((address: string) => {
+        console.log(activeChainId)
+        this.actions.update({ chainId: activeChainId, accounts: [address] })
+        resolve()
       })
-    }
+      ambireSDK.onRegistrationSuccess((address: string) => {
+        this.actions.update({ chainId: activeChainId, accounts: [address] })
+        resolve()
+      })
+    })
   }
 }
 
