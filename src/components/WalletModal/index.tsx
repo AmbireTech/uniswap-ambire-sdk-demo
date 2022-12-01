@@ -274,7 +274,7 @@ export default function WalletModal({
     const walletConnectionOption =
       (!isInjectedMobileBrowser && <WalletConnectOption tryActivation={tryActivation} />) ?? null
 
-    const ambireLogin = <AmbireLogin />
+    const ambireLogin = <AmbireLogin tryActivation={tryActivation} />
 
     return (
       <>

@@ -2,9 +2,9 @@ window.AmbireSDK = function (opt = {}) {
   const self = this
 
   this.dappName = opt.dappName ?? 'Unknown Dapp'
-  this.wrapperElement = document.getElementById(opt.wrapperElementId ?? "ambire-sdk-wrapper")
-  this.iframeElement = document.getElementById(opt.iframeElementId ?? "ambire-sdk-iframe")
-  this.closeButton = document.getElementById(opt.closeButtonId ?? "ambire-sdk-iframe-close")
+  this.wrapperElement = document.getElementById(opt.wrapperElementId ?? 'ambire-sdk-wrapper')
+  this.iframeElement = document.getElementById(opt.iframeElementId ?? 'ambire-sdk-iframe')
+  this.closeButton = document.getElementById(opt.closeButtonId ?? 'ambire-sdk-iframe-close')
 
   this.hideIframe = function () {
     self.iframeElement.style.visibility = 'hidden'
@@ -50,34 +50,40 @@ window.AmbireSDK = function (opt = {}) {
       return alert('Invalid input for message')
     }
     // convert string to hex
-    const msgInHex = '0x' + messageToSign.split('')
-      .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
-      .join('')
+    const msgInHex =
+      '0x' +
+      messageToSign
+        .split('')
+        .map((c) => c.charCodeAt(0).toString(16).padStart(2, '0'))
+        .join('')
     self.showIframe(`${opt.walletUrl}/#/sign-message-sdk/${msgInHex}`)
 
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl) return
-      if (e.data.type !== 'signClose') return
-      self.hideIframe()
-    }, false)
+    window.addEventListener(
+      'message',
+      (e) => {
+        if (e.origin !== opt.walletUrl) return
+        if (e.data.type !== 'signClose') return
+        self.hideIframe()
+      },
+      false
+    )
   }
 
   this.openSendTransaction = function (to, value, data) {
-    if (
-      !to || !value || !data
-      || typeof to !== 'string'
-      || typeof value !== 'string'
-      || typeof data !== 'string'
-    ) {
+    if (!to || !value || !data || typeof to !== 'string' || typeof value !== 'string' || typeof data !== 'string') {
       return alert('Invalid txn input data')
     }
     self.showIframe(`${opt.walletUrl}/#/send-transaction-sdk/${to}/${value}/${data}`)
 
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl) return
-      if (e.data.type !== 'signClose') return
-      self.hideIframe()
-    }, false)
+    window.addEventListener(
+      'message',
+      (e) => {
+        if (e.origin !== opt.walletUrl) return
+        if (e.data.type !== 'signClose') return
+        self.hideIframe()
+      },
+      false
+    )
   }
 
   // emit event

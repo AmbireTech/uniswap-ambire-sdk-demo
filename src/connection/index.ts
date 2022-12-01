@@ -3,6 +3,7 @@ import { initializeConnector, Web3ReactHooks } from '@web3-react/core'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
 import { Network } from '@web3-react/network'
+import type {} from '@web3-react/types'
 import { Connector } from '@web3-react/types'
 import { WalletConnect } from '@web3-react/walletconnect'
 import { SupportedChainId } from 'constants/chains'
@@ -78,25 +79,30 @@ export const walletConnectConnection: Connection = {
   type: ConnectionType.WALLET_CONNECT,
 }
 
-const [ambireConnect, ambireConnectHooks] = initializeConnector<WalletConnect>((actions) => {
-  // Avoid testing for the best URL by only passing a single URL per chain.
-  // Otherwise, WC will not initialize until all URLs have been tested (see getBestUrl in web3-react).
-  const RPC_URLS_WITHOUT_FALLBACKS = Object.entries(RPC_URLS).reduce(
-    (map, [chainId, urls]) => ({
-      ...map,
-      [chainId]: urls[0],
-    }),
-    {}
-  )
-  return new WalletConnect({
-    actions,
-    options: {
-      rpc: RPC_URLS_WITHOUT_FALLBACKS,
-      qrcode: true,
-    },
-    onError,
-  })
-})
+class AmbireWallet extends Connector {
+  activate(): Promise<void> | void {
+    if (window.AmbireSDK) {
+      const ambireSDK = new window.AmbireSDK({
+        walletUrl: 'http://localhost:3000',
+        dappName: 'dapp1',
+        chainID: 1,
+        iframeElementId: 'ambire-sdk-iframe',
+      })
+      ambireSDK.openLogin()
+
+      return new Promise((resolve, reject) => {
+        ambireSDK.onLoginSuccess((address: string) => {
+          this.actions.update({ chainId: 1, accounts: [address] })
+          resolve()
+        })
+      })
+    }
+  }
+}
+
+const [ambireConnect, ambireConnectHooks] = initializeConnector<AmbireWallet>(
+  (actions) => new AmbireWallet(actions, onError)
+)
 export const ambireConnection: Connection = {
   connector: ambireConnect,
   hooks: ambireConnectHooks,
