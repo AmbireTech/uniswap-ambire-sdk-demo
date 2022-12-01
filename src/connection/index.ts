@@ -95,6 +95,10 @@ class AmbireWallet extends Connector {
           this.actions.update({ chainId: 1, accounts: [address] })
           resolve()
         })
+        ambireSDK.onRegistrationSuccess((address: string) => {
+          this.actions.update({ chainId: 1, accounts: [address] })
+          resolve()
+        })
       })
     }
   }
