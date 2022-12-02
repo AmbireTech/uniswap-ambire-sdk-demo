@@ -87,7 +87,7 @@ const ambireSDK = new window.AmbireSDK({
 })
 class AmbireWallet extends Connector {
   activate(chainInfo: any): Promise<void> | void {
-    ambireSDK.openLogin()
+    ambireSDK.openLogin(chainInfo)
 
     return new Promise((resolve, reject) => {
       ambireSDK.onLoginSuccess((data: any) => {
