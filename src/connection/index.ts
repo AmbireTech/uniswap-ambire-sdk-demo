@@ -86,18 +86,18 @@ const ambireSDK = new window.AmbireSDK({
   iframeElementId: 'ambire-sdk-iframe',
 })
 class AmbireWallet extends Connector {
-  activate(chainId: any): Promise<void> | void {
-    const activeChainId = chainId ? chainId.chainId : 1
+  activate(chainInfo: any): Promise<void> | void {
     ambireSDK.openLogin()
 
     return new Promise((resolve, reject) => {
-      ambireSDK.onLoginSuccess((address: string) => {
-        console.log(activeChainId)
-        this.actions.update({ chainId: activeChainId, accounts: [address] })
+      ambireSDK.onLoginSuccess((data: any) => {
+        const activeChainId = chainInfo ? chainInfo.chainId : data.chainId
+        this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
       })
-      ambireSDK.onRegistrationSuccess((address: string) => {
-        this.actions.update({ chainId: activeChainId, accounts: [address] })
+      ambireSDK.onRegistrationSuccess((data: any) => {
+        const activeChainId = chainInfo ? chainInfo.chainId : data.chainId
+        this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
       })
     })
