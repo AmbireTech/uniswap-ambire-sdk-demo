@@ -91,12 +91,14 @@ class AmbireWallet extends Connector {
 
     return new Promise((resolve, reject) => {
       ambireSDK.onLoginSuccess((data: any) => {
-        const activeChainId = chainInfo ? chainInfo.chainId : data.chainId
+        const activeChainId: SupportedChainId = chainInfo ? parseInt(chainInfo.chainId) : parseInt(data.chainId)
+        this.customProvider = RPC_PROVIDERS[activeChainId]
         this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
       })
       ambireSDK.onRegistrationSuccess((data: any) => {
-        const activeChainId = chainInfo ? chainInfo.chainId : data.chainId
+        const activeChainId: SupportedChainId = chainInfo ? chainInfo.chainId : data.chainId
+        this.customProvider = RPC_PROVIDERS[activeChainId]
         this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
       })
