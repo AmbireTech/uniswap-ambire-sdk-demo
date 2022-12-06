@@ -145,7 +145,11 @@ class AmbireProvider extends JsonRpcProvider {
               ambireSDK.openSendTransaction(txn.to, txn.value ?? 0, txn.data)
 
               return new Promise((resolve, reject) => {
-                ambireSDK.onTxnFinish(async (data: any) => {
+                ambireSDK.onTxnRejected(() => {
+                  reject({ code: 4001 })
+                })
+
+                ambireSDK.onTxnSuccess(async (data: any) => {
                   // TO DO: if a hash is not returned, return a reject
                   // if a hash is returned, try to poll the txn value
 

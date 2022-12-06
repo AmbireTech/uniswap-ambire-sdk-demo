@@ -74,16 +74,6 @@ window.AmbireSDK = function (opt = {}) {
       return alert('Invalid txn input data')
     }
     self.showIframe(`${opt.walletUrl}/#/sdk/send-transaction/${to}/${value}/${data}`)
-
-    window.addEventListener(
-      'message',
-      (e) => {
-        if (e.origin !== opt.walletUrl) return
-        if (e.data.type !== 'signClose') return
-        self.hideIframe()
-      },
-      false
-    )
   }
 
   // emit event
@@ -128,11 +118,20 @@ window.AmbireSDK = function (opt = {}) {
     })
   }
 
-  // ambire-send-txn listener
-  this.onTxnFinish = function (callback) {
+  this.onTxnRejected = function (callback) {
     window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type !== 'signClose') return
+      if (e.origin !== opt.walletUrl || e.data.type !== 'txnRejected') return
 
+      self.hideIframe()
+      callback(e.data)
+    })
+  }
+
+  this.onTxnSuccess = function (callback) {
+    window.addEventListener('message', (e) => {
+      if (e.origin !== opt.walletUrl || e.data.type !== 'txnSuccess') return
+
+      self.hideIframe()
       callback(e.data)
     })
   }
