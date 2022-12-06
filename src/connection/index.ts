@@ -1,3 +1,7 @@
+import { Networkish } from '@ethersproject/networks'
+import { JsonRpcProvider, JsonRpcSigner } from '@ethersproject/providers'
+import { ConnectionInfo } from '@ethersproject/web'
+import { poll } from '@ethersproject/web'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { initializeConnector, Web3ReactHooks } from '@web3-react/core'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
@@ -85,6 +89,7 @@ const ambireSDK = new window.AmbireSDK({
   chainID: 1,
   iframeElementId: 'ambire-sdk-iframe',
 })
+
 class AmbireWallet extends Connector {
   activate(chainInfo: any): Promise<void> | void {
     ambireSDK.openLogin(chainInfo)
@@ -92,17 +97,88 @@ class AmbireWallet extends Connector {
     return new Promise((resolve, reject) => {
       ambireSDK.onLoginSuccess((data: any) => {
         const activeChainId: SupportedChainId = chainInfo ? parseInt(chainInfo.chainId) : parseInt(data.chainId)
-        this.customProvider = RPC_PROVIDERS[activeChainId]
+        this.customProvider = this.getProvider(data.address)
         this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
       })
       ambireSDK.onRegistrationSuccess((data: any) => {
         const activeChainId: SupportedChainId = chainInfo ? chainInfo.chainId : data.chainId
-        this.customProvider = RPC_PROVIDERS[activeChainId]
+        this.customProvider = this.getProvider(data.address)
         this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
       })
     })
+  }
+
+  getProvider(address: string): AmbireProvider {
+    // we should probably make a custom RPC provider
+    // with a custom getSigner method
+    // it is okay for that signer to return a JsonRpcSigner object
+    // we should pass the address to the JsonRpcSigner as well
+    // but we should rewrite the JsonRpcSigner sendTransaction
+    // to use the one from the SDK
+
+    return new AmbireProvider(address, 'https://polygon-rpc.com/rpc')
+  }
+}
+
+class AmbireProvider extends JsonRpcProvider {
+  _address: string
+
+  constructor(address: string, url?: ConnectionInfo | string, network?: Networkish) {
+    super(url, network)
+    this._address = address
+  }
+
+  getSigner(addressOrIndex?: string | number): JsonRpcSigner {
+    const signerAddress = addressOrIndex ? addressOrIndex : this._address
+    const signer = super.getSigner(signerAddress)
+    const provider = this
+
+    const handler1 = {
+      get(target: any, prop: any, receiver: any) {
+        if (prop === 'sendTransaction') {
+          const value = target[prop]
+          if (value instanceof Function) {
+            return function (...args: any) {
+              const txn = args[0]
+              ambireSDK.openSendTransaction(txn.to, txn.value ?? 0, txn.data)
+
+              return new Promise((resolve, reject) => {
+                ambireSDK.onTxnFinish(async (data: any) => {
+                  // TO DO: if a hash is not returned, return a reject
+                  // if a hash is returned, try to poll the txn value
+
+                  const hash = data.hash
+
+                  try {
+                    const blockNumber = await provider._getInternalBlockNumber(100 + 2 * provider.pollingInterval)
+
+                    return await poll(
+                      async () => {
+                        const tx = await provider.getTransaction(hash)
+                        if (tx === null) {
+                          return undefined
+                        }
+                        return resolve(provider._wrapTransaction(tx, hash, blockNumber))
+                      },
+                      { oncePoll: provider }
+                    )
+                  } catch (error) {
+                    ;(error as any).transactionHash = hash
+                    throw error
+                  }
+                })
+              })
+            }
+          }
+        }
+
+        return Reflect.get(target, prop, receiver)
+      },
+    }
+
+    return new Proxy(signer, handler1)
   }
 }
 

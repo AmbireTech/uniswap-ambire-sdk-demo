@@ -128,6 +128,15 @@ window.AmbireSDK = function (opt = {}) {
     })
   }
 
+  // ambire-send-txn listener
+  this.onTxnFinish = function (callback) {
+    window.addEventListener('message', (e) => {
+      if (e.origin !== opt.walletUrl || e.data.type !== 'signClose') return
+
+      callback(e.data)
+    })
+  }
+
   // handlers
   window.addEventListener('keyup', function (e) {
     if (e.key == 'Escape') {
