@@ -91,25 +91,26 @@ const ambireSDK = new window.AmbireSDK({
 
 class AmbireWallet extends Connector {
   activate(chainInfo: any): Promise<void> | void {
+    this.actions.startActivation()
     ambireSDK.openLogin(chainInfo)
 
     return new Promise((resolve, reject) => {
       ambireSDK.onLoginSuccess((data: any) => {
         const activeChainId: SupportedChainId = chainInfo ? parseInt(chainInfo.chainId) : parseInt(data.chainId)
-        this.customProvider = this.getProvider(data.address)
+        this.customProvider = this.getProvider(data.address, data.providerUrl)
         this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
       })
       ambireSDK.onRegistrationSuccess((data: any) => {
         const activeChainId: SupportedChainId = chainInfo ? chainInfo.chainId : data.chainId
-        this.customProvider = this.getProvider(data.address)
+        this.customProvider = this.getProvider(data.address, data.providerUrl)
         this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
       })
     })
   }
 
-  getProvider(address: string): AmbireProvider {
+  getProvider(address: string, providerUrl: string): AmbireProvider {
     // we should probably make a custom RPC provider
     // with a custom getSigner method
     // it is okay for that signer to return a JsonRpcSigner object
@@ -117,7 +118,7 @@ class AmbireWallet extends Connector {
     // but we should rewrite the JsonRpcSigner sendTransaction
     // to use the one from the SDK
 
-    return new AmbireProvider(address, 'https://polygon-rpc.com/rpc')
+    return new AmbireProvider(address, providerUrl)
   }
 }
 
@@ -140,8 +141,8 @@ class AmbireProvider extends JsonRpcProvider {
           const value = target[prop]
           if (value instanceof Function) {
             return function (...args: any) {
-              const txn = args[0]
-              ambireSDK.openSendTransaction(txn.to, txn.value ?? 0, txn.data)
+              const txn = args.data ? args : args[0]
+              ambireSDK.openSendTransaction(txn.to, txn.value ?? '0', txn.data)
 
               return new Promise((resolve, reject) => {
                 ambireSDK.onTxnSent(async (data: any) => {
@@ -155,6 +156,15 @@ class AmbireProvider extends JsonRpcProvider {
                   reject({ code: 4001 })
                 })
               })
+            }
+          }
+        }
+
+        if (prop === 'connectUnchecked') {
+          const value = target[prop]
+          if (value instanceof Function) {
+            return function (...args: any) {
+              return new Proxy(signer, handler1)
             }
           }
         }
