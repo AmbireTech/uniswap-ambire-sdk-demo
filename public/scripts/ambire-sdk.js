@@ -127,9 +127,9 @@ window.AmbireSDK = function (opt = {}) {
     })
   }
 
-  this.onTxnSuccess = function (callback) {
+  this.onTxnSent = function (callback) {
     window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type !== 'txnSuccess') return
+      if (e.origin !== opt.walletUrl || e.data.type !== 'txnSent') return
 
       self.hideIframe()
       callback(e.data)

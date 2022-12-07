@@ -1,7 +1,6 @@
 import { Networkish } from '@ethersproject/networks'
 import { JsonRpcProvider, JsonRpcSigner } from '@ethersproject/providers'
 import { ConnectionInfo } from '@ethersproject/web'
-import { poll } from '@ethersproject/web'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { initializeConnector, Web3ReactHooks } from '@web3-react/core'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
@@ -145,33 +144,15 @@ class AmbireProvider extends JsonRpcProvider {
               ambireSDK.openSendTransaction(txn.to, txn.value ?? 0, txn.data)
 
               return new Promise((resolve, reject) => {
+                ambireSDK.onTxnSent(async (data: any) => {
+                  const hash = data.hash
+                  const tx = await provider.getTransaction(hash)
+                  const response = provider._wrapTransaction(tx, hash)
+                  response.data = txn.data
+                  return resolve(response)
+                })
                 ambireSDK.onTxnRejected(() => {
                   reject({ code: 4001 })
-                })
-
-                ambireSDK.onTxnSuccess(async (data: any) => {
-                  // TO DO: if a hash is not returned, return a reject
-                  // if a hash is returned, try to poll the txn value
-
-                  const hash = data.hash
-
-                  try {
-                    const blockNumber = await provider._getInternalBlockNumber(100 + 2 * provider.pollingInterval)
-
-                    return await poll(
-                      async () => {
-                        const tx = await provider.getTransaction(hash)
-                        if (tx === null) {
-                          return undefined
-                        }
-                        return resolve(provider._wrapTransaction(tx, hash, blockNumber))
-                      },
-                      { oncePoll: provider }
-                    )
-                  } catch (error) {
-                    ;(error as any).transactionHash = hash
-                    throw error
-                  }
                 })
               })
             }
