@@ -111,13 +111,6 @@ class AmbireWallet extends Connector {
   }
 
   getProvider(address: string, providerUrl: string): AmbireProvider {
-    // we should probably make a custom RPC provider
-    // with a custom getSigner method
-    // it is okay for that signer to return a JsonRpcSigner object
-    // we should pass the address to the JsonRpcSigner as well
-    // but we should rewrite the JsonRpcSigner sendTransaction
-    // to use the one from the SDK
-
     return new AmbireProvider(address, providerUrl)
   }
 }
@@ -169,11 +162,40 @@ class AmbireProvider extends JsonRpcProvider {
           }
         }
 
+        if (prop === 'signMessage' || prop === '_legacySignMessage' || prop === '_signTypedData') {
+          const value = target[prop]
+          if (value instanceof Function) {
+            return function (...args: any) {
+              const type =
+                prop === 'signMessage'
+                  ? 'personal_sign'
+                  : prop === '_legacySignMessage'
+                  ? 'eth_sign'
+                  : 'eth_signTypedData_v4'
+              return provider.handleMsgSign(type, args)
+            }
+          }
+        }
+
         return Reflect.get(target, prop, receiver)
       },
     }
 
     return new Proxy(signer, handler1)
+  }
+
+  handleMsgSign(type: string, args: any) {
+    const message = args.length === 1 ? args[0] : args
+    ambireSDK.openSignMessage(type, message)
+
+    return new Promise((resolve, reject) => {
+      ambireSDK.msgSigned((data: any) => {
+        return resolve(args[0])
+      })
+      ambireSDK.onMsgRejected(() => {
+        reject({ code: 4001 })
+      })
+    })
   }
 }
 

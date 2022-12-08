@@ -45,28 +45,32 @@ window.AmbireSDK = function (opt = {}) {
     self.showIframe(opt.walletUrl + '/#/sdk/email-login' + chainIdParam)
   }
 
-  this.openSignMessage = function (messageToSign) {
-    if (!messageToSign || typeof messageToSign !== 'string') {
-      return alert('Invalid input for message')
-    }
-    // convert string to hex
-    const msgInHex =
-      '0x' +
-      messageToSign
-        .split('')
-        .map((c) => c.charCodeAt(0).toString(16).padStart(2, '0'))
-        .join('')
-    self.showIframe(`${opt.walletUrl}/#/sdk/sign-message/${msgInHex}`)
+  this.openSignMessage = function (type, messageToSign) {
+    if (!messageToSign) return alert('Invalid input for message')
 
-    window.addEventListener(
-      'message',
-      (e) => {
-        if (e.origin !== opt.walletUrl) return
-        if (e.data.type !== 'signClose') return
-        self.hideIframe()
-      },
-      false
-    )
+    if (type === 'eth_sign') {
+      if (typeof messageToSign !== 'string') {
+        return alert('Invalid input for message')
+      }
+    }
+    else if (type === 'personal_sign') {
+      if (typeof messageToSign !== 'string') {
+        return alert('Invalid input for message')
+      }
+
+      // convert string to hex
+      messageToSign = '0x' + messageToSign.split('')
+        .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
+        .join('')
+    }
+    else if (['eth_signTypedData', 'eth_signTypedData_v4'].includes(type)) {
+      messageToSign = encodeURIComponent(JSON.stringify(messageToSign))
+    }
+    else {
+      return alert('Invalid sign type')
+    }
+
+    self.showIframe(`${opt.walletUrl}/#/sdk/sign-message/${type}/${messageToSign}`)
   }
 
   this.openSendTransaction = function (to, value, data) {
@@ -130,6 +134,24 @@ window.AmbireSDK = function (opt = {}) {
   this.onTxnSent = function (callback) {
     window.addEventListener('message', (e) => {
       if (e.origin !== opt.walletUrl || e.data.type !== 'txnSent') return
+
+      self.hideIframe()
+      callback(e.data)
+    })
+  }
+
+  this.onMsgSigned = function (callback) {
+    window.addEventListener('message', (e) => {
+      if (e.origin !== opt.walletUrl || e.data.type !== 'msgSigned') return
+
+      self.hideIframe()
+      callback(e.data)
+    })
+  }
+
+  this.onMsgRejected = function (callback) {
+    window.addEventListener('message', (e) => {
+      if (e.origin !== opt.walletUrl || e.data.type !== 'msgRejected') return
 
       self.hideIframe()
       callback(e.data)
