@@ -116,6 +116,18 @@ class AmbireWallet extends Connector {
     })
   }
 
+  deactivate(): Promise<void> | void {
+    ambireSDK.openLogout()
+
+    return new Promise((resolve, reject) => {
+      ambireSDK.onLogoutSuccess(() => {
+        this.customProvider = null
+        this.actions.resetState()
+        resolve()
+      })
+    })
+  }
+
   getProvider(address: string, providerUrl: string): AmbireProvider {
     return new AmbireProvider(address, providerUrl)
   }
