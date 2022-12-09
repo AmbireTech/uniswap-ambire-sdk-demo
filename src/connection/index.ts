@@ -95,6 +95,12 @@ class AmbireWallet extends Connector {
     ambireSDK.openLogin(chainInfo)
 
     return new Promise((resolve, reject) => {
+      ambireSDK.onAlreadyLoggedIn((data: any) => {
+        const activeChainId: SupportedChainId = chainInfo ? parseInt(chainInfo.chainId) : parseInt(data.chainId)
+        this.customProvider = this.getProvider(data.address, data.providerUrl)
+        this.actions.update({ chainId: activeChainId, accounts: [data.address] })
+        resolve()
+      })
       ambireSDK.onLoginSuccess((data: any) => {
         const activeChainId: SupportedChainId = chainInfo ? parseInt(chainInfo.chainId) : parseInt(data.chainId)
         this.customProvider = this.getProvider(data.address, data.providerUrl)

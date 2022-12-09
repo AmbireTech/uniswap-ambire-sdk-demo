@@ -41,8 +41,9 @@ window.AmbireSDK = function (opt = {}) {
   }
 
   this.openLogin = function (chainInfo = null) {
-    const chainIdParam = chainInfo ? '?chainId=' + chainInfo.chainId : ''
-    self.showIframe(opt.walletUrl + '/#/sdk/email-login' + chainIdParam)
+    let query = `?dappOrigin=${window.location.origin}`
+    query = chainInfo ? `${query}&chainId=${chainInfo.chainId}` : query
+    self.showIframe(opt.walletUrl + '/#/sdk/email-login' + query)
   }
 
   this.openSignMessage = function (type, messageToSign) {
@@ -52,21 +53,21 @@ window.AmbireSDK = function (opt = {}) {
       if (typeof messageToSign !== 'string') {
         return alert('Invalid input for message')
       }
-    }
-    else if (type === 'personal_sign') {
+    } else if (type === 'personal_sign') {
       if (typeof messageToSign !== 'string') {
         return alert('Invalid input for message')
       }
 
       // convert string to hex
-      messageToSign = '0x' + messageToSign.split('')
-        .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
-        .join('')
-    }
-    else if (['eth_signTypedData', 'eth_signTypedData_v4'].includes(type)) {
+      messageToSign =
+        '0x' +
+        messageToSign
+          .split('')
+          .map((c) => c.charCodeAt(0).toString(16).padStart(2, '0'))
+          .join('')
+    } else if (['eth_signTypedData', 'eth_signTypedData_v4'].includes(type)) {
       messageToSign = encodeURIComponent(JSON.stringify(messageToSign))
-    }
-    else {
+    } else {
       return alert('Invalid sign type')
     }
 
@@ -92,6 +93,15 @@ window.AmbireSDK = function (opt = {}) {
     // console.log(`${eventName} was received`)
     window.addEventListener(eventName, function (event) {
       callback(event)
+    })
+  }
+
+  this.onAlreadyLoggedIn = function (callback) {
+    window.addEventListener('message', (e) => {
+      if (e.origin !== opt.walletUrl || e.data.type !== 'alreadyLoggedIn') return
+
+      self.hideIframe()
+      callback(e.data)
     })
   }
 
@@ -122,6 +132,24 @@ window.AmbireSDK = function (opt = {}) {
     })
   }
 
+  this.onMsgRejected = function (callback) {
+    window.addEventListener('message', (e) => {
+      if (e.origin !== opt.walletUrl || e.data.type !== 'msgRejected') return
+
+      self.hideIframe()
+      callback(e.data)
+    })
+  }
+
+  this.onMsgSigned = function (callback) {
+    window.addEventListener('message', (e) => {
+      if (e.origin !== opt.walletUrl || e.data.type !== 'msgSigned') return
+
+      self.hideIframe()
+      callback(e.data)
+    })
+  }
+
   this.onTxnRejected = function (callback) {
     window.addEventListener('message', (e) => {
       if (e.origin !== opt.walletUrl || e.data.type !== 'txnRejected') return
@@ -140,31 +168,12 @@ window.AmbireSDK = function (opt = {}) {
     })
   }
 
-  this.onMsgSigned = function (callback) {
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type !== 'msgSigned') return
-
-      self.hideIframe()
-      callback(e.data)
-    })
-  }
-
-  this.onMsgRejected = function (callback) {
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type !== 'msgRejected') return
-
-      self.hideIframe()
-      callback(e.data)
-    })
-  }
-
   // handlers
   window.addEventListener('keyup', function (e) {
     if (e.key == 'Escape') {
       self.hideIframe()
     }
   })
-
   this.closeButton.addEventListener('click', function () {
     self.hideIframe()
   })
