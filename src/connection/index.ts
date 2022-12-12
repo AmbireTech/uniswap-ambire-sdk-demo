@@ -7,7 +7,7 @@ import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
 import { Network } from '@web3-react/network'
 import type {} from '@web3-react/types'
-import { Connector } from '@web3-react/types'
+import { Actions, Connector } from '@web3-react/types'
 import { WalletConnect } from '@web3-react/walletconnect'
 import { SupportedChainId } from 'constants/chains'
 
@@ -82,32 +82,32 @@ export const walletConnectConnection: Connection = {
   type: ConnectionType.WALLET_CONNECT,
 }
 
-const ambireSDK = new window.AmbireSDK({
-  walletUrl: 'http://localhost:3000',
-  dappName: 'dapp1',
-  chainID: 1,
-  iframeElementId: 'ambire-sdk-iframe',
-})
-
 class AmbireWallet extends Connector {
+  _sdk: any
+
+  constructor(actions: Actions, options: any, onError?: (error: Error) => void) {
+    super(actions, onError)
+    this._sdk = new window.AmbireSDK(options)
+  }
+
   activate(chainInfo: any): Promise<void> | void {
     this.actions.startActivation()
-    ambireSDK.openLogin(chainInfo)
+    this._sdk.openLogin(chainInfo)
 
     return new Promise((resolve, reject) => {
-      ambireSDK.onAlreadyLoggedIn((data: any) => {
+      this._sdk.onAlreadyLoggedIn((data: any) => {
         const activeChainId: SupportedChainId = chainInfo ? parseInt(chainInfo.chainId) : parseInt(data.chainId)
         this.customProvider = this.getProvider(data.address, data.providerUrl)
         this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
       })
-      ambireSDK.onLoginSuccess((data: any) => {
+      this._sdk.onLoginSuccess((data: any) => {
         const activeChainId: SupportedChainId = chainInfo ? parseInt(chainInfo.chainId) : parseInt(data.chainId)
         this.customProvider = this.getProvider(data.address, data.providerUrl)
         this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
       })
-      ambireSDK.onRegistrationSuccess((data: any) => {
+      this._sdk.onRegistrationSuccess((data: any) => {
         const activeChainId: SupportedChainId = chainInfo ? chainInfo.chainId : data.chainId
         this.customProvider = this.getProvider(data.address, data.providerUrl)
         this.actions.update({ chainId: activeChainId, accounts: [data.address] })
@@ -117,10 +117,10 @@ class AmbireWallet extends Connector {
   }
 
   deactivate(): Promise<void> | void {
-    ambireSDK.openLogout()
+    this._sdk.openLogout()
 
     return new Promise((resolve, reject) => {
-      ambireSDK.onLogoutSuccess(() => {
+      this._sdk.onLogoutSuccess(() => {
         this.customProvider = null
         this.actions.resetState()
         resolve()
@@ -129,16 +129,18 @@ class AmbireWallet extends Connector {
   }
 
   getProvider(address: string, providerUrl: string): AmbireProvider {
-    return new AmbireProvider(address, providerUrl)
+    return new AmbireProvider(this._sdk, address, providerUrl)
   }
 }
 
 class AmbireProvider extends JsonRpcProvider {
   _address: string
+  _sdk: any
 
-  constructor(address: string, url?: ConnectionInfo | string, network?: Networkish) {
+  constructor(sdk: any, address: string, url?: ConnectionInfo | string, network?: Networkish) {
     super(url, network)
     this._address = address
+    this._sdk = sdk
   }
 
   getSigner(addressOrIndex?: string | number): JsonRpcSigner {
@@ -153,17 +155,17 @@ class AmbireProvider extends JsonRpcProvider {
           if (value instanceof Function) {
             return function (...args: any) {
               const txn = args.data ? args : args[0]
-              ambireSDK.openSendTransaction(txn.to, txn.value ?? '0', txn.data)
+              provider._sdk.openSendTransaction(txn.to, txn.value ?? '0', txn.data)
 
               return new Promise((resolve, reject) => {
-                ambireSDK.onTxnSent(async (data: any) => {
+                provider._sdk.onTxnSent(async (data: any) => {
                   const hash = data.hash
                   const tx = await provider.getTransaction(hash)
                   const response = provider._wrapTransaction(tx, hash)
                   response.data = txn.data
                   return resolve(response)
                 })
-                ambireSDK.onTxnRejected(() => {
+                provider._sdk.onTxnRejected(() => {
                   reject({ code: 4001 })
                 })
               })
@@ -204,21 +206,27 @@ class AmbireProvider extends JsonRpcProvider {
 
   handleMsgSign(type: string, args: any) {
     const message = args.length === 1 ? args[0] : args
-    ambireSDK.openSignMessage(type, message)
+    this._sdk.openSignMessage(type, message)
 
     return new Promise((resolve, reject) => {
-      ambireSDK.msgSigned((data: any) => {
+      this._sdk.msgSigned((data: any) => {
         return resolve(args[0])
       })
-      ambireSDK.onMsgRejected(() => {
+      this._sdk.onMsgRejected(() => {
         reject({ code: 4001 })
       })
     })
   }
 }
 
+const sdkOptions = {
+  walletUrl: 'http://localhost:3000',
+  dappName: 'dapp1',
+  chainID: 1,
+  iframeElementId: 'ambire-sdk-iframe',
+}
 const [ambireConnect, ambireConnectHooks] = initializeConnector<AmbireWallet>(
-  (actions) => new AmbireWallet(actions, onError)
+  (actions) => new AmbireWallet(actions, sdkOptions, onError)
 )
 export const ambireConnection: Connection = {
   connector: ambireConnect,
