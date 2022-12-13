@@ -113,6 +113,12 @@ class AmbireWallet extends Connector {
         this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
       })
+      this._sdk.onActionRejected((data: any) => {
+        const activeChainId: SupportedChainId = parseInt(data.chainId)
+        this.customProvider = this.getProvider(data.address, data.providerUrl)
+        this.actions.update({ chainId: activeChainId, accounts: [data.address] })
+        reject({ code: 4001, message: 'User rejected the request.' })
+      })
     })
   }
 
