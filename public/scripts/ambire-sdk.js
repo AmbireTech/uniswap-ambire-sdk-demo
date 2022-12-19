@@ -2,9 +2,9 @@ window.AmbireSDK = function (opt = {}) {
   const self = this
 
   this.dappName = opt.dappName ?? 'Unknown Dapp'
-  this.wrapperElement = document.getElementById(opt.wrapperElementId ?? 'ambire-sdk-wrapper')
-  this.iframeElement = document.getElementById(opt.iframeElementId ?? 'ambire-sdk-iframe')
-  this.closeButton = document.getElementById(opt.closeButtonId ?? 'ambire-sdk-iframe-close')
+  this.wrapperElement = document.getElementById(opt.wrapperElementId ?? "ambire-sdk-wrapper")
+  this.iframeElement = document.getElementById(opt.iframeElementId ?? "ambire-sdk-iframe")
+  this.closeButton = document.getElementById(opt.closeButtonId ?? "ambire-sdk-iframe-close")
 
   this.hideIframe = function () {
     self.iframeElement.style.visibility = 'hidden'
@@ -125,7 +125,7 @@ window.AmbireSDK = function (opt = {}) {
     window.addEventListener('message', (e) => {
       if (e.origin !== opt.walletUrl || e.data.type != 'registrationSuccess') return
 
-      const buyCrypto = opt.walletUrl + '/#/sdk/on-ramp/' + opt.chainID
+      const buyCrypto = opt.walletUrl + '/#/sdk/on-ramp'
       self.iframeElement.innerHTML = `<iframe src="` + buyCrypto + `" width="100%" height="100%" frameborder="0"/>`
       callback(e.data)
     })
@@ -176,6 +176,15 @@ window.AmbireSDK = function (opt = {}) {
   this.onTxnSent = function (callback) {
     window.addEventListener('message', (e) => {
       if (e.origin !== opt.walletUrl || e.data.type !== 'txnSent') return
+
+      self.hideIframe()
+      callback(e.data)
+    })
+  }
+
+  this.onActionRejected = function (callback) {
+    window.addEventListener('message', (e) => {
+      if (e.origin !== opt.walletUrl || e.data.type !== 'actionRejected') return
 
       self.hideIframe()
       callback(e.data)
