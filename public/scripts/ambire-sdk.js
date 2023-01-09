@@ -41,7 +41,7 @@ window.AmbireSDK = function (opt = {}) {
   }
 
   this.openLogin = function (chainInfo = null) {
-    let query = `?dappOrigin=${window.location.origin}`
+    let query = `?dappOrigin=${window.location.origin}&dappName=${self.dappName}`
     query = chainInfo ? `${query}&chainId=${chainInfo.chainId}` : query
     self.showIframe(opt.walletUrl + '/#/sdk/email-login' + query)
   }
@@ -64,14 +64,16 @@ window.AmbireSDK = function (opt = {}) {
       }
 
       // convert string to hex
-      messageToSign =
-        '0x' +
-        messageToSign
-          .split('')
-          .map((c) => c.charCodeAt(0).toString(16).padStart(2, '0'))
-          .join('')
+      messageToSign = messageToSign.match(/^0x[0-9A-Fa-f]+$/g)
+        ? messageToSign
+        : '0x' +
+          messageToSign
+            .split('')
+            .map((c) => c.charCodeAt(0).toString(16).padStart(2, '0'))
+            .join('')
     } else if (['eth_signTypedData', 'eth_signTypedData_v4'].includes(type)) {
-      messageToSign = encodeURIComponent(JSON.stringify(messageToSign))
+      messageToSign = typeof messageToSign === 'string' ? messageToSign : JSON.stringify(messageToSign)
+      messageToSign = encodeURIComponent(messageToSign)
     } else {
       return alert('Invalid sign type')
     }
@@ -125,7 +127,7 @@ window.AmbireSDK = function (opt = {}) {
     window.addEventListener('message', (e) => {
       if (e.origin !== opt.walletUrl || e.data.type != 'registrationSuccess') return
 
-      const buyCrypto = opt.walletUrl + '/#/sdk/on-ramp/' + opt.chainID
+      const buyCrypto = opt.walletUrl + '/#/sdk/on-ramp'
       self.iframeElement.innerHTML = `<iframe src="` + buyCrypto + `" width="100%" height="100%" frameborder="0"/>`
       callback(e.data)
     })
