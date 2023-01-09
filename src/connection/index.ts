@@ -96,7 +96,7 @@ class AmbireWallet extends Connector {
 
     return new Promise((resolve, reject) => {
       this._sdk.onAlreadyLoggedIn((data: any) => {
-        const activeChainId: SupportedChainId = chainInfo ? parseInt(chainInfo.chainId) : parseInt(data.chainId)
+        const activeChainId: SupportedChainId = parseInt(data.chainId)
         this.customProvider = this.getProvider(data.address, data.providerUrl)
         this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
@@ -112,6 +112,12 @@ class AmbireWallet extends Connector {
         this.customProvider = this.getProvider(data.address, data.providerUrl)
         this.actions.update({ chainId: activeChainId, accounts: [data.address] })
         resolve()
+      })
+      this._sdk.onActionRejected((data: any) => {
+        const activeChainId: SupportedChainId = parseInt(data.chainId)
+        this.customProvider = this.getProvider(data.address, data.providerUrl)
+        this.actions.update({ chainId: activeChainId, accounts: [data.address] })
+        reject({ code: 4001, message: 'User rejected the request.' })
       })
     })
   }
