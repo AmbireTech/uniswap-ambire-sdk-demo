@@ -4,14 +4,11 @@ window.AmbireSDK = function (opt = {}) {
   this.dappName = opt.dappName ?? 'Unknown Dapp'
   this.wrapperElement = document.getElementById(opt.wrapperElementId ?? 'ambire-sdk-wrapper')
   this.iframeElement = document.getElementById(opt.iframeElementId ?? 'ambire-sdk-iframe')
-  this.closeButton = document.getElementById(opt.closeButtonId ?? 'ambire-sdk-iframe-close')
 
   this.hideIframe = function () {
     self.iframeElement.style.visibility = 'hidden'
     self.iframeElement.style.opacity = 0
     self.iframeElement.style.pointerEvents = 'none'
-
-    self.closeButton.style.display = 'none'
 
     document.body.style.pointerEvents = 'auto'
     self.wrapperElement.style.visibility = 'hidden'
@@ -23,9 +20,8 @@ window.AmbireSDK = function (opt = {}) {
     document.body.style.pointerEvents = 'none'
     self.wrapperElement.style.visibility = 'visible'
     self.wrapperElement.style.opacity = 1
-    self.wrapperElement.style.pointerEvents = 'none'
 
-    self.iframeElement.style.width = '60%'
+    self.iframeElement.style.width = '380px'
     self.iframeElement.style.height = '600px'
 
     self.iframeElement.style.visibility = 'visible'
@@ -34,10 +30,7 @@ window.AmbireSDK = function (opt = {}) {
 
     self.iframeElement.innerHTML = `<iframe src="` + url + `" width="100%" height="100%" frameborder="0"/>`
 
-    self.closeButton.style.display = 'block'
     self.wrapperElement.style.zIndex = 9999
-    self.closeButton.style.zIndex = 9999
-    self.closeButton.style.pointerEvents = 'auto'
   }
 
   this.openLogin = function (chainInfo = null) {
@@ -199,7 +192,16 @@ window.AmbireSDK = function (opt = {}) {
       self.hideIframe()
     }
   })
-  this.closeButton.addEventListener('click', function () {
-    self.hideIframe()
+
+  this.wrapperElement.addEventListener('click', function (e) {
+    if (e.target === self.wrapperElement) {
+      self.hideIframe()
+    }
+  })
+
+  this.iframeElement.addEventListener('click', function (e) {
+    if (e.target === self.iframeElement) {
+      e.stopPropagation()
+    }
   })
 }
