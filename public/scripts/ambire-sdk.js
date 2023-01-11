@@ -68,10 +68,10 @@ window.AmbireSDK = function (opt = {}) {
       messageToSign = messageToSign.match(/^0x[0-9A-Fa-f]+$/g)
         ? messageToSign
         : '0x' +
-          messageToSign
-            .split('')
-            .map((c) => c.charCodeAt(0).toString(16).padStart(2, '0'))
-            .join('')
+        messageToSign
+          .split('')
+          .map((c) => c.charCodeAt(0).toString(16).padStart(2, '0'))
+          .join('')
     } else if (['eth_signTypedData', 'eth_signTypedData_v4'].includes(type)) {
       messageToSign = typeof messageToSign === 'string' ? messageToSign : JSON.stringify(messageToSign)
       messageToSign = encodeURIComponent(messageToSign)
