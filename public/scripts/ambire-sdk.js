@@ -193,15 +193,9 @@ window.AmbireSDK = function (opt = {}) {
     }
   })
 
-  this.wrapperElement.addEventListener('click', function (e) {
-    if (e.target === self.wrapperElement) {
-      self.hideIframe()
-    }
-  })
+  window.addEventListener('message', (e) => {
+    if (e.origin !== opt.walletUrl || e.data.type !== 'actionClose') return
 
-  this.iframeElement.addEventListener('click', function (e) {
-    if (e.target === self.iframeElement) {
-      e.stopPropagation()
-    }
+    self.hideIframe()
   })
 }
