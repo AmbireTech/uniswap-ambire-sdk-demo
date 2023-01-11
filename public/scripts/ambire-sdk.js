@@ -2,6 +2,7 @@ window.AmbireSDK = function (opt = {}) {
   const self = this
 
   this.dappName = opt.dappName ?? 'Unknown Dapp'
+  this.dappIconPath = opt.dappIconPath ?? ''
   this.wrapperElement = document.getElementById(opt.wrapperElementId ?? 'ambire-sdk-wrapper')
   this.iframeElement = document.getElementById(opt.iframeElementId ?? 'ambire-sdk-iframe')
 
@@ -34,7 +35,7 @@ window.AmbireSDK = function (opt = {}) {
   }
 
   this.openLogin = function (chainInfo = null) {
-    let query = `?dappOrigin=${window.location.origin}&dappName=${self.dappName}`
+    let query = `?dappOrigin=${window.location.origin}&dappName=${self.dappName}&dappIcon=${self.dappIconPath}`
     query = chainInfo ? `${query}&chainId=${chainInfo.chainId}` : query
     self.showIframe(opt.walletUrl + '/#/sdk/email-login' + query)
   }
@@ -71,7 +72,7 @@ window.AmbireSDK = function (opt = {}) {
       return alert('Invalid sign type')
     }
 
-    self.showIframe(`${opt.walletUrl}/#/sdk/sign-message/${type}/${messageToSign}`)
+    self.showIframe(`${opt.walletUrl}/#/sdk/sign-message/${type}/${messageToSign}?dappOrigin=${window.location.origin}`)
   }
 
   this.openSendTransaction = function (to, value, data) {
