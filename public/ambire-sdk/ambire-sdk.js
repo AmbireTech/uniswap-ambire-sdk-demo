@@ -4,34 +4,33 @@ window.AmbireSDK = function (opt = {}) {
   this.dappName = opt.dappName ?? 'Unknown Dapp'
   this.dappIconPath = opt.dappIconPath ?? ''
   this.wrapperElement = document.getElementById(opt.wrapperElementId ?? 'ambire-sdk-wrapper')
-  this.iframeElement = document.getElementById(opt.iframeElementId ?? 'ambire-sdk-iframe')
 
   this.hideIframe = function () {
-    self.iframeElement.style.visibility = 'hidden'
-    self.iframeElement.style.opacity = 0
-    self.iframeElement.style.pointerEvents = 'none'
-
     document.body.style.pointerEvents = 'auto'
-    self.wrapperElement.style.visibility = 'hidden'
-    self.wrapperElement.style.opacity = 0
-    self.wrapperElement.style.pointerEvents = 'auto'
+
+    self.wrapperElement.classList.remove('visible')
+
+    const wrapperChildren = self.wrapperElement?.childNodes
+
+    if (wrapperChildren?.length > 0) {
+      wrapperChildren.forEach((child) => {
+        child.remove()
+      })
+    }
   }
 
   this.showIframe = function (url) {
     document.body.style.pointerEvents = 'none'
-    self.wrapperElement.style.visibility = 'visible'
-    self.wrapperElement.style.opacity = 1
 
-    self.iframeElement.style.width = '380px'
-    self.iframeElement.style.height = '600px'
+    self.wrapperElement.classList.add('visible')
 
-    self.iframeElement.style.visibility = 'visible'
-    self.iframeElement.style.opacity = 1
-    self.iframeElement.style.pointerEvents = 'auto'
+    const iframe = document.createElement('iframe')
 
-    self.iframeElement.innerHTML = `<iframe src="` + url + `" width="100%" height="100%" frameborder="0"/>`
-
-    self.wrapperElement.style.zIndex = 9999
+    iframe.src = url
+    iframe.width = '380px'
+    iframe.height = '600px'
+    iframe.id = 'ambire-sdk-iframe'
+    self.wrapperElement.appendChild(iframe)
   }
 
   this.openLogin = function (chainInfo = null) {
