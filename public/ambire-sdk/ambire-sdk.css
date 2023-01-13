@@ -13,16 +13,6 @@
   height: 600px;
 }
 
-#ambire-sdk-iframe iframe {
-  border: 0;
-}
-
-#ambire-sdk-iframe.visible {
-  visibility: visible;
-  opacity: 1;
-  pointer-events: auto;
-}
-
 #ambire-sdk-wrapper {
   position: fixed;
   top: 0;
