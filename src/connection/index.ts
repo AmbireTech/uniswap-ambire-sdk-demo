@@ -81,9 +81,10 @@ export const walletConnectConnection: Connection = {
 
 const sdkOptions = {
   walletUrl: 'http://localhost:3000',
-  dappName: 'dapp1',
+  dappName: 'Uniswap-Ambire-SDK-Demo',
+  dappIconPath: 'http://localhost:3001/favicon.png',
   chainID: 1,
-  iframeElementId: 'ambire-sdk-iframe',
+  wrapperElementId: 'ambire-sdk-wrapper',
 }
 const [ambireConnect, ambireConnectHooks] = initializeConnector<AmbireWallet>(
   (actions) => new AmbireWallet(actions, sdkOptions, onError)
