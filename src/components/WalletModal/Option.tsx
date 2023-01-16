@@ -42,7 +42,8 @@ const OptionCard = styled(InfoCard as any)`
 `
 
 const OptionCardLeft = styled.div`
-  ${flexColumnNoWrap};
+  ${flexRowNoWrap};
+  align-items: center;
   justify-content: center;
   height: 100%;
 `
@@ -50,6 +51,7 @@ const OptionCardLeft = styled.div`
 const OptionCardClickable = styled(OptionCard as any)<{
   active?: boolean
   clickable?: boolean
+  isAmbire: boolean
 }>`
   margin-top: 0;
   border: ${({ active, theme }) => active && `1px solid ${theme.accentActive}`};
@@ -58,6 +60,7 @@ const OptionCardClickable = styled(OptionCard as any)<{
     background-color: ${({ theme }) => theme.hoverState};
   }
   opacity: ${({ disabled }) => (disabled ? '0.5' : '1')};
+  border: ${({ isAmbire, theme }) => `1px solid ${isAmbire ? '#6000FF' : theme.backgroundInteractive}`};
 `
 
 const HeaderText = styled.div`
@@ -72,8 +75,8 @@ const HeaderText = styled.div`
 
 const SubHeader = styled.div`
   color: ${({ theme }) => theme.deprecated_text1};
-  margin-top: 10px;
   font-size: 12px;
+  margin-left: 10px;
 `
 
 const IconWrapper = styled.div<{ size?: number | null }>`
@@ -102,6 +105,7 @@ export default function Option({
   icon,
   isActive = false,
   id,
+  isAmbire = false,
 }: {
   link?: string | null
   clickable?: boolean
@@ -113,6 +117,7 @@ export default function Option({
   icon: string
   isActive?: boolean
   id: string
+  isAmbire?: boolean
 }) {
   const content = (
     <TraceEvent
@@ -127,6 +132,7 @@ export default function Option({
         clickable={clickable && !isActive}
         active={isActive}
         data-testid="wallet-modal-option"
+        isAmbire={isAmbire}
       >
         <OptionCardLeft>
           <HeaderText color={color}>
