@@ -226,7 +226,7 @@ class AmbireProvider extends JsonRpcProvider {
 }
 
 const sdkOptions = {
-  walletUrl: 'http://localhost:3000',
+  walletUrl: 'https://wallet.ambire.com/sdk-login/',
   dappName: 'dapp1',
   chainID: 1,
   iframeElementId: 'ambire-sdk-iframe',
