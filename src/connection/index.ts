@@ -80,9 +80,9 @@ export const walletConnectConnection: Connection = {
 }
 
 const sdkOptions = {
-  walletUrl: 'https://wallet.ambire.com/sdk-login/',
+  walletUrl: 'https://wallet.ambire.com/sdk-login',
   dappName: 'Uniswap-Ambire-SDK-Demo',
-  dappIconPath: 'http://localhost:3001/favicon.png',
+  dappIconPath: 'https://ambiretech.github.io/uniswap-ambire-sdk-demo/favicon.png',
   chainID: 1,
   wrapperElementId: 'ambire-sdk-wrapper',
 }
