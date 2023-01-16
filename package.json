@@ -236,7 +236,8 @@
     "workbox-navigation-preload": "^6.1.0",
     "workbox-precaching": "^6.1.0",
     "workbox-routing": "^6.1.0",
-    "zustand": "^4.0.0-rc.1"
+    "zustand": "^4.0.0-rc.1",
+    "ambire-wallet-connector": "github:AmbireTech/wallet-login-sdk#fe8b3f3413c7c54791fae6c5b9d4f9511f121eb9"
   },
   "engines": {
     "npm": "please-use-yarn",

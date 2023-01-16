@@ -4,41 +4,35 @@ window.AmbireSDK = function (opt = {}) {
   this.dappName = opt.dappName ?? 'Unknown Dapp'
   this.dappIconPath = opt.dappIconPath ?? ''
   this.wrapperElement = document.getElementById(opt.wrapperElementId ?? 'ambire-sdk-wrapper')
-  this.iframeElement = document.getElementById(opt.iframeElementId ?? 'ambire-sdk-iframe')
-  this.closeButton = document.getElementById(opt.closeButtonId ?? 'ambire-sdk-iframe-close')
+
+  this.iframe = null
 
   this.hideIframe = function () {
-    self.iframeElement.style.visibility = 'hidden'
-    self.iframeElement.style.opacity = 0
-    self.iframeElement.style.pointerEvents = 'none'
-
-    self.closeButton.style.display = 'none'
-
     document.body.style.pointerEvents = 'auto'
-    self.wrapperElement.style.visibility = 'hidden'
-    self.wrapperElement.style.opacity = 0
-    self.wrapperElement.style.pointerEvents = 'auto'
+
+    self.wrapperElement.classList.remove('visible')
+
+    const wrapperChildren = self.wrapperElement?.childNodes
+
+    if (wrapperChildren?.length > 0) {
+      wrapperChildren.forEach((child) => {
+        child.remove()
+      })
+    }
   }
 
   this.showIframe = function (url) {
     document.body.style.pointerEvents = 'none'
-    self.wrapperElement.style.visibility = 'visible'
-    self.wrapperElement.style.opacity = 1
-    self.wrapperElement.style.pointerEvents = 'none'
 
-    self.iframeElement.style.width = '60%'
-    self.iframeElement.style.height = '600px'
+    self.wrapperElement.classList.add('visible')
 
-    self.iframeElement.style.visibility = 'visible'
-    self.iframeElement.style.opacity = 1
-    self.iframeElement.style.pointerEvents = 'auto'
+    self.iframe = document.createElement('iframe')
 
-    self.iframeElement.innerHTML = `<iframe src="` + url + `" width="100%" height="100%" frameborder="0"/>`
-
-    self.closeButton.style.display = 'block'
-    self.wrapperElement.style.zIndex = 9999
-    self.closeButton.style.zIndex = 9999
-    self.closeButton.style.pointerEvents = 'auto'
+    self.iframe.src = url
+    self.iframe.width = '380px'
+    self.iframe.height = '600px'
+    self.iframe.id = 'ambire-sdk-iframe'
+    self.wrapperElement.appendChild(self.iframe)
   }
 
   this.openLogin = function (chainInfo = null) {
@@ -104,94 +98,60 @@ window.AmbireSDK = function (opt = {}) {
     })
   }
 
-  this.onAlreadyLoggedIn = function (callback) {
+  this.onMessage = function (messageType, sdkCallback, clientCallback = undefined) {
     window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type !== 'alreadyLoggedIn') return
+      if (e.origin !== opt.walletUrl || e.data.type !== messageType) return
 
-      self.hideIframe()
-      callback(e.data)
+      sdkCallback()
+
+      if (clientCallback) clientCallback(e.data)
     })
+  }
+
+  this.onAlreadyLoggedIn = function (callback) {
+    self.onMessage('alreadyLoggedIn', () => self.hideIframe(), callback)
   }
 
   // ambire-login-success listener
   this.onLoginSuccess = function (callback) {
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type !== 'loginSuccess') return
-
-      self.hideIframe()
-      callback(e.data)
-    })
+    self.onMessage('loginSuccess', () => self.hideIframe(), callback)
   }
 
   // ambire-registration-success listener
   this.onRegistrationSuccess = function (callback) {
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type != 'registrationSuccess') return
+    self.onMessage(
+      'registrationSuccess',
+      () => {
+        self.iframe.src = opt.walletUrl + '/#/sdk/on-ramp'
+      },
+      callback
+    )
 
-      const buyCrypto = opt.walletUrl + '/#/sdk/on-ramp'
-      self.iframeElement.innerHTML = `<iframe src="` + buyCrypto + `" width="100%" height="100%" frameborder="0"/>`
-      callback(e.data)
-    })
-
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type != 'finishRamp') return
-
-      self.hideIframe()
-    })
+    self.onMessage('finishRamp', () => self.hideIframe())
   }
 
   this.onLogoutSuccess = function (callback) {
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type !== 'logoutSuccess') return
-
-      self.hideIframe()
-      callback(e.data)
-    })
+    self.onMessage('logoutSuccess', () => self.hideIframe(), callback)
   }
 
   this.onMsgRejected = function (callback) {
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type !== 'msgRejected') return
-
-      self.hideIframe()
-      callback(e.data)
-    })
+    self.onMessage('msgRejected', () => self.hideIframe(), callback)
   }
 
   this.onMsgSigned = function (callback) {
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type !== 'msgSigned') return
-
-      self.hideIframe()
-      callback(e.data)
-    })
+    self.onMessage('msgSigned', () => self.hideIframe(), callback)
   }
 
   this.onTxnRejected = function (callback) {
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type !== 'txnRejected') return
-
-      self.hideIframe()
-      callback(e.data)
-    })
+    self.onMessage('txnRejected', () => self.hideIframe(), callback)
   }
 
   this.onTxnSent = function (callback) {
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type !== 'txnSent') return
-
-      self.hideIframe()
-      callback(e.data)
-    })
+    self.onMessage('txnSent', () => self.hideIframe(), callback)
   }
 
   this.onActionRejected = function (callback) {
-    window.addEventListener('message', (e) => {
-      if (e.origin !== opt.walletUrl || e.data.type !== 'actionRejected') return
-
-      self.hideIframe()
-      callback(e.data)
-    })
+    self.onMessage('actionRejected', () => self.hideIframe(), callback)
   }
 
   // handlers
@@ -200,7 +160,10 @@ window.AmbireSDK = function (opt = {}) {
       self.hideIframe()
     }
   })
-  this.closeButton.addEventListener('click', function () {
+
+  window.addEventListener('message', (e) => {
+    if (e.origin !== opt.walletUrl || e.data.type !== 'actionClose') return
+
     self.hideIframe()
   })
 }
