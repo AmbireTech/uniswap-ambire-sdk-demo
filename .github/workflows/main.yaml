@@ -24,7 +24,7 @@ jobs:
       with:
         node-version: 14.x
     - name: Install Yarn
-        npm install --global yarn
+      run: npm install --global yarn
     - name: Install Yarn packages ♾️🕳️
       run: yarn
 
