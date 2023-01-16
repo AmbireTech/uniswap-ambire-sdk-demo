@@ -17,6 +17,7 @@ export function AmbireLogin({ tryActivation }: { tryActivation: (connector: Conn
       isActive={false}
       onClick={() => tryActivation(ambireConnection.connector)}
       header="Email Login"
+      additionalHeader="by Ambire"
     />
   )
 }

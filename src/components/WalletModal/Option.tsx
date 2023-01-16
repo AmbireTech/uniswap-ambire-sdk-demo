@@ -91,6 +91,11 @@ const IconWrapper = styled.div<{ size?: number | null }>`
   `};
 `
 
+const ExtraHeader = styled.span`
+  color: red;
+  margin-left: 5px;
+`
+
 export default function Option({
   link = null,
   clickable = true,
@@ -102,6 +107,7 @@ export default function Option({
   icon,
   isActive = false,
   id,
+  additionalHeader,
 }: {
   link?: string | null
   clickable?: boolean
@@ -113,6 +119,7 @@ export default function Option({
   icon: string
   isActive?: boolean
   id: string
+  additionalHeader?: string | null
 }) {
   const content = (
     <TraceEvent
@@ -134,6 +141,7 @@ export default function Option({
               <img src={icon} alt="Icon" />
             </IconWrapper>
             {header}
+            {additionalHeader ? <ExtraHeader>{additionalHeader}</ExtraHeader> : <></>}
           </HeaderText>
           {subheader && <SubHeader>{subheader}</SubHeader>}
         </OptionCardLeft>
