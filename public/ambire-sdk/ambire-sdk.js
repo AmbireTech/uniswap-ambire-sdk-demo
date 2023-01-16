@@ -62,10 +62,10 @@ window.AmbireSDK = function (opt = {}) {
       messageToSign = messageToSign.match(/^0x[0-9A-Fa-f]+$/g)
         ? messageToSign
         : '0x' +
-        messageToSign
-          .split('')
-          .map((c) => c.charCodeAt(0).toString(16).padStart(2, '0'))
-          .join('')
+          messageToSign
+            .split('')
+            .map((c) => c.charCodeAt(0).toString(16).padStart(2, '0'))
+            .join('')
     } else if (['eth_signTypedData', 'eth_signTypedData_v4'].includes(type)) {
       messageToSign = typeof messageToSign === 'string' ? messageToSign : JSON.stringify(messageToSign)
       messageToSign = encodeURIComponent(messageToSign)
@@ -100,7 +100,7 @@ window.AmbireSDK = function (opt = {}) {
 
   this.onMessage = function (messageType, sdkCallback, clientCallback = undefined) {
     window.addEventListener('message', (e) => {
-      if (e.origin !== this.getOrigin() || e.data.type !== messageType) return
+      if (e.origin !== self.getOrigin() || e.data.type !== messageType) return
 
       sdkCallback()
 
@@ -162,7 +162,7 @@ window.AmbireSDK = function (opt = {}) {
   })
 
   window.addEventListener('message', (e) => {
-    if (e.origin !== this.getOrigin() || e.data.type !== 'actionClose') return
+    if (e.origin !== self.getOrigin() || e.data.type !== 'actionClose') return
 
     self.hideIframe()
   })
@@ -171,6 +171,6 @@ window.AmbireSDK = function (opt = {}) {
   // symbols at the end. Otherwise, messages do not pass. This code ensures the correct
   // origin is passed
   this.getOrigin = () => {
-    return opt.walletUrl.substring(0, opt.walletUrl.indexOf('/', opt.walletUrl.indexOf('//') + 2))
+    return opt.walletUrl.split('/').slice(0, 3).join('/')
   }
 }
