@@ -23,11 +23,13 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 14.x
-    - name: Install NPM packages ♾️🕳️
-      run: npm ci
+    - name: Install Yarn
+        npm install --global yarn
+    - name: Install Yarn packages ♾️🕳️
+      run: yarn
 
     - name: Build project 🛠️
-      run: npm run build
+      run: yarn build
 
     - name: Deploy 🚀🌕 
       if: github.ref == 'refs/heads/main'
