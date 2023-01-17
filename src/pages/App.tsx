@@ -15,7 +15,7 @@ import styled from 'styled-components/macro'
 import { SpinnerSVG } from 'theme/components'
 import { flexRowNoWrap } from 'theme/styles'
 import { Z_INDEX } from 'theme/zIndex'
-import { isProductionEnv } from 'utils/env'
+// import { isProductionEnv } from 'utils/env'
 import { getCLS, getFCP, getFID, getLCP, Metric } from 'web-vitals'
 
 import { useAnalyticsReporter } from '../components/analytics'
@@ -57,7 +57,7 @@ initializeAnalytics(ANALYTICS_DUMMY_KEY, OriginApplication.INTERFACE, {
   proxyUrl: ANALYTICS_PROXY_URL,
   defaultEventName: EventName.PAGE_VIEWED,
   commitHash: COMMIT_HASH,
-  isProductionEnv: isProductionEnv(),
+  isProductionEnv: false, // isProductionEnv(),
 })
 
 const AppWrapper = styled.div`
