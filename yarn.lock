@@ -5495,9 +5495,9 @@ alphanum-sort@^1.0.0:
   resolved "https://registry.yarnpkg.com/alphanum-sort/-/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
   integrity sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM=
 
-ambire-wallet-connector@AmbireTech/wallet-login-sdk#a6a4d39ed7995ce51c9c59f0f2164c7b6cf5e563:
+ambire-wallet-connector@AmbireTech/wallet-login-sdk#99508609a971a3e94affd231f6b6d3a6f53c2d92:
   version "1.0.0"
-  resolved "https://codeload.github.com/AmbireTech/wallet-login-sdk/tar.gz/a6a4d39ed7995ce51c9c59f0f2164c7b6cf5e563"
+  resolved "https://codeload.github.com/AmbireTech/wallet-login-sdk/tar.gz/99508609a971a3e94affd231f6b6d3a6f53c2d92"
   dependencies:
     "@ethersproject/networks" "^5.7.1"
     "@ethersproject/providers" "^5.7.2"
