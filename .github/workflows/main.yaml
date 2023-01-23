@@ -27,6 +27,8 @@ jobs:
       run: npm install --global yarn
     - name: Install Yarn packages ♾️🕳️
       run: yarn
+    - name: Increase max old space size
+      run: export NODE_OPTIONS="--max-old-space-size=8192"
 
     - name: Build project 🛠️
       run: yarn build
