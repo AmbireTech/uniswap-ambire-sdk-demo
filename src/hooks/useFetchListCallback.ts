@@ -1,3 +1,4 @@
+import { Provider } from '@ethersproject/abstract-provider'
 import { nanoid } from '@reduxjs/toolkit'
 import { TokenList } from '@uniswap/token-lists'
 import { SupportedChainId } from 'constants/chains'
@@ -23,7 +24,8 @@ export function useFetchListCallback(): (
       sendDispatch && dispatch(fetchTokenList.pending({ requestId, url: listUrl }))
       return getTokenList(
         listUrl,
-        (ensName: string) => resolveENSContentHash(ensName, RPC_PROVIDERS[SupportedChainId.MAINNET]),
+        (ensName: string) =>
+          resolveENSContentHash(ensName, RPC_PROVIDERS[SupportedChainId.MAINNET] as unknown as Provider),
         skipValidation
       )
         .then((tokenList) => {
