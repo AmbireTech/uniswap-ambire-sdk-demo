@@ -10,6 +10,7 @@ module.exports = {
     plugins: ['@vanilla-extract/babel-plugin'],
   },
   webpack: {
+    maximumFileSizeToCacheInBytes: 20 * 1024 * 1024,
     plugins: [
       new VanillaExtractPlugin(),
       new DefinePlugin({
