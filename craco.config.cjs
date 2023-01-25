@@ -10,7 +10,6 @@ module.exports = {
     plugins: ['@vanilla-extract/babel-plugin'],
   },
   webpack: {
-    maximumFileSizeToCacheInBytes: 20 * 1024 * 1024,
     plugins: [
       new VanillaExtractPlugin(),
       new DefinePlugin({
@@ -18,6 +17,11 @@ module.exports = {
       }),
     ],
     configure: (webpackConfig) => {
+      const instanceOfInjectManifest = webpackConfig.plugins.find(
+        (plugin) => plugin.constructor.name === 'InjectManifest'
+      )
+      if (instanceOfInjectManifest !== undefined) instanceOfInjectManifest.config.maximumFileSizeToCacheInBytes = 5242880 * 10 + 1
+
       const instanceOfMiniCssExtractPlugin = webpackConfig.plugins.find(
         (plugin) => plugin instanceof MiniCssExtractPlugin
       )
