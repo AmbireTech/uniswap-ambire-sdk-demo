@@ -21,6 +21,9 @@ jobs:
 
     - name: set max old space size
       run: export NODE_OPTIONS="--max-old-space-size=4096"
+    - name: check if node options are set
+      run: echo $NODE_OPTIONS
+      
     - name: Install Node.js ⚙️
       uses: actions/setup-node@v3
       with:
