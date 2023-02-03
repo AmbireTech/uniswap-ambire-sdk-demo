@@ -5,7 +5,7 @@ import { MetaMask } from '@web3-react/metamask'
 import { Network } from '@web3-react/network'
 import { Connector } from '@web3-react/types'
 import { WalletConnect } from '@web3-react/walletconnect'
-import { AmbireWallet } from 'ambire-wallet-connector'
+import { AmbireWallet } from 'ambire-login-sdk'
 import { SupportedChainId } from 'constants/chains'
 
 import UNISWAP_LOGO_URL from '../assets/svg/logo.svg'
@@ -84,7 +84,6 @@ const sdkOptions = {
   dappName: 'Uniswap-Ambire-SDK-Demo',
   dappIconPath: 'https://ambiretech.github.io/uniswap-ambire-sdk-demo/favicon.png',
   chainID: 1,
-  wrapperElementId: 'ambire-sdk-wrapper',
 }
 const [ambireConnect, ambireConnectHooks] = initializeConnector<AmbireWallet>(
   (actions) => new AmbireWallet(actions, sdkOptions, onError)
