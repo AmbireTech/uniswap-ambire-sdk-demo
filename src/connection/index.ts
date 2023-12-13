@@ -1,3 +1,4 @@
+import { AmbireConnector } from '@ambire/login-sdk-web3-react'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { initializeConnector, Web3ReactHooks } from '@web3-react/core'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
@@ -5,7 +6,6 @@ import { MetaMask } from '@web3-react/metamask'
 import { Network } from '@web3-react/network'
 import { Connector } from '@web3-react/types'
 import { WalletConnect } from '@web3-react/walletconnect'
-import { AmbireWallet } from 'ambire-login-sdk'
 import { SupportedChainId } from 'constants/chains'
 
 import UNISWAP_LOGO_URL from '../assets/svg/logo.svg'
@@ -80,13 +80,13 @@ export const walletConnectConnection: Connection = {
 }
 
 const sdkOptions = {
-  walletUrl: 'https://wallet.ambire.com/sdk-login',
+  walletUrl: 'https://wallet2.ambire.com/sdk-login',
   dappName: 'Uniswap-Ambire-SDK-Demo',
   dappIconPath: 'https://ambiretech.github.io/uniswap-ambire-sdk-demo/favicon.png',
   chainID: 1,
 }
-const [ambireConnect, ambireConnectHooks] = initializeConnector<AmbireWallet>(
-  (actions) => new AmbireWallet(actions, sdkOptions, onError)
+const [ambireConnect, ambireConnectHooks] = initializeConnector<AmbireConnector>(
+  (actions) => new AmbireConnector(actions, sdkOptions, onError)
 )
 export const ambireConnection: Connection = {
   connector: ambireConnect,
